@@ -136,3 +136,13 @@ button {
   text-decoration: none;
   font-weight: bold;
 }
+
+/* Media queries dla responsywności */
+@media (max-width: 600px) {
+  .dashboard {
+    flex-direction: column;
+  }
+  .side-panel {
+    width: 100%;
+  }
+}
