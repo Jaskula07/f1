@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
-/* Definicje kolorów zgodnie z wytycznymi */
+/* Definicje kolorów */
 :root {
   --primary: #7851A9;    /* Royal Purple */
   --accent: #EA00D9;     /* Neon Magenta */
@@ -15,7 +17,7 @@ html, body, #root {
 body {
   background: #121212;
   color: #e0e0e0;
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'Roboto', sans-serif;
 }
 
 .app-container,
@@ -94,7 +96,7 @@ button {
   cursor: pointer;
 }
 
-/* Style dla widoków */
+/* Style dla widoków Dashboard */
 .dashboard-view .logo h1 {
   color: var(--primary);
 }
