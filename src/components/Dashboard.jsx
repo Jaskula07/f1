@@ -88,7 +88,7 @@ function Dashboard({ onNavigate }) {
       <hr />
       {/* Dodatkowe statystyki */}
       <div className="additional-stats">
-        <p><strong>Jeśli dalej będziesz wpłacał:</strong></p>
+        <p><strong>Jeśli daalej będziesz wpłacał:</strong></p>
         <p>dziennie średnio: {avgDaily.toFixed(2)}€</p>
         <p>tygodniowo średnio: {avgWeekly.toFixed(2)}€</p>
         <p>miesięcznie średnio: {avgMonthly.toFixed(2)}€</p>
