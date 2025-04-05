@@ -26,6 +26,15 @@ function Dashboard({ onNavigate }) {
   const avgWeekly = avgDaily * 7
   const avgMonthly = avgDaily * 30
 
+  // Predykcja daty osiągnięcia celu na podstawie średniej dziennej
+  let predictedDate = ""
+  if (avgDaily > 0 && goal.amount > total) {
+    const remaining = goal.amount - total
+    const daysNeeded = remaining / avgDaily
+    const predicted = new Date(today.getTime() + daysNeeded * 24 * 3600 * 1000)
+    predictedDate = predicted.toLocaleDateString()
+  }
+
   const handleAdd = () => {
     if (addAmount) {
       dispatch(addEntry(Number(addAmount)))
@@ -77,12 +86,19 @@ function Dashboard({ onNavigate }) {
         </div>
       </div>
       <hr />
-      {/* Nowa sekcja dodatkowych statystyk */}
+      {/* Dodatkowe statystyki */}
       <div className="additional-stats">
         <p><strong>Jeśli dalej będziesz wpłacał:</strong></p>
         <p>dziennie średnio: {avgDaily.toFixed(2)}€</p>
         <p>tygodniowo średnio: {avgWeekly.toFixed(2)}€</p>
         <p>miesięcznie średnio: {avgMonthly.toFixed(2)}€</p>
+        {predictedDate && (
+          <p>
+            <strong>
+              to osiągniesz cel dnia: <span style={{ color: 'var(--highlight)', fontWeight: 'bold' }}>{predictedDate}</span>
+            </strong>
+          </p>
+        )}
       </div>
       <hr />
       <div className="navigation-buttons">
