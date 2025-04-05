@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Dashboard from './components/Dashboard'
 import Settings from './components/Settings'
 import History from './components/History'
-import Statistics from './components/Statistics'
+import Kalkulator from './components/Kalkulator'
 
 function App() {
   const [view, setView] = useState('dashboard')
@@ -15,8 +15,8 @@ function App() {
         return <Settings onBack={() => setView('dashboard')} />
       case 'history':
         return <History onBack={() => setView('dashboard')} />
-      case 'statistics':
-        return <Statistics onBack={() => setView('dashboard')} />
+      case 'kalkulator':
+        return <Kalkulator onBack={() => setView('dashboard')} />
       default:
         return <Dashboard onNavigate={setView} />
     }
