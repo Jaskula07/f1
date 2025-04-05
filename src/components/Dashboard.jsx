@@ -7,21 +7,36 @@ function Dashboard({ onNavigate }) {
   const dispatch = useDispatch()
   const goal = useSelector((state) => state.savings.goal)
   const total = useSelector((state) => state.savings.total)
+  const entries = useSelector((state) => state.savings.entries)
   const progress = goal.amount > 0 ? Math.min((total / goal.amount) * 100, 100) : 0
 
+  // Pola do wprowadzania kwot
   const [addAmount, setAddAmount] = useState('')
   const [subtractAmount, setSubtractAmount] = useState('')
+
+  // Obliczenia statystyk – podobne do tych w Statistics.jsx
+  const totalSaved = entries.reduce((sum, entry) => sum + entry.amount, 0)
+  let firstDate = null
+  if (entries.length > 0) {
+    firstDate = new Date(Math.min(...entries.map(entry => new Date(entry.date).getTime())))
+  }
+  const today = new Date()
+  const diffDays = firstDate ? Math.max((today - firstDate) / (1000 * 3600 * 24), 1) : 1
+  const avgDaily = totalSaved / diffDays
+  const avgWeekly = avgDaily * 7
+  const avgMonthly = avgDaily * 30
 
   const handleAdd = () => {
     if (addAmount) {
       dispatch(addEntry(Number(addAmount)))
-      dispatch(addXP(Number(addAmount))) // opcjonalnie, jeśli masz mechanikę XP
+      dispatch(addXP(Number(addAmount))) // Opcjonalnie, jeśli masz mechanikę XP
       setAddAmount('')
     }
   }
+
   const handleSubtract = () => {
     if (subtractAmount) {
-      dispatch(addEntry(-Number(subtractAmount))) // odejmujemy jako ujemna wartość
+      dispatch(addEntry(-Number(subtractAmount))) // Odejmujemy jako ujemna wartość
       setSubtractAmount('')
     }
   }
@@ -29,7 +44,7 @@ function Dashboard({ onNavigate }) {
   return (
     <div className="dashboard-view">
       <div className="logo">
-        <h1 style={{ color: 'var(--primary)' }}>FinansowyQuest</h1>
+        <h1>FinansowyQuest</h1>
       </div>
       <hr />
       <div className="goal-info">
@@ -60,6 +75,14 @@ function Dashboard({ onNavigate }) {
           />
           <button onClick={handleSubtract} style={{ background: 'var(--accent)' }}>Odejmij</button>
         </div>
+      </div>
+      <hr />
+      {/* Nowa sekcja dodatkowych statystyk */}
+      <div className="additional-stats">
+        <p><strong>Jeśli dalej będziesz wpłacał:</strong></p>
+        <p>dziennie średnio: {avgDaily.toFixed(2)}€</p>
+        <p>tygodniowo średnio: {avgWeekly.toFixed(2)}€</p>
+        <p>miesięcznie średnio: {avgMonthly.toFixed(2)}€</p>
       </div>
       <hr />
       <div className="navigation-buttons">
