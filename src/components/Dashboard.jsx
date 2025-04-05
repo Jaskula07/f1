@@ -14,7 +14,7 @@ function Dashboard({ onNavigate }) {
   const [addAmount, setAddAmount] = useState('')
   const [subtractAmount, setSubtractAmount] = useState('')
 
-  // Obliczenia statystyk – podobne do tych w Statistics.jsx
+  // Obliczenia statystyk na podstawie historii
   const totalSaved = entries.reduce((sum, entry) => sum + entry.amount, 0)
   let firstDate = null
   if (entries.length > 0) {
@@ -26,7 +26,7 @@ function Dashboard({ onNavigate }) {
   const avgWeekly = avgDaily * 7
   const avgMonthly = avgDaily * 30
 
-  // Predykcja daty osiągnięcia celu na podstawie średniej dziennej
+  // Predykcja daty osiągnięcia celu na podstawie wyliczonej średniej dziennej
   let predictedDate = ""
   if (avgDaily > 0 && goal.amount > total) {
     const remaining = goal.amount - total
@@ -38,14 +38,14 @@ function Dashboard({ onNavigate }) {
   const handleAdd = () => {
     if (addAmount) {
       dispatch(addEntry(Number(addAmount)))
-      dispatch(addXP(Number(addAmount))) // Opcjonalnie, jeśli masz mechanikę XP
+      dispatch(addXP(Number(addAmount)))
       setAddAmount('')
     }
   }
 
   const handleSubtract = () => {
     if (subtractAmount) {
-      dispatch(addEntry(-Number(subtractAmount))) // Odejmujemy jako ujemna wartość
+      dispatch(addEntry(-Number(subtractAmount)))
       setSubtractAmount('')
     }
   }
@@ -86,7 +86,6 @@ function Dashboard({ onNavigate }) {
         </div>
       </div>
       <hr />
-      {/* Dodatkowe statystyki */}
       <div className="additional-stats">
         <p><strong>Jeśli dalej będziesz wpłacał:</strong></p>
         <p>dziennie średnio: {avgDaily.toFixed(2)}€</p>
@@ -110,7 +109,7 @@ function Dashboard({ onNavigate }) {
       <div className="navigation-buttons">
         <button onClick={() => onNavigate('settings')} style={{ background: 'var(--accent)' }}>USTAWIENIA</button>
         <button onClick={() => onNavigate('history')} style={{ background: 'var(--accent)' }}>HISTORIA</button>
-        <button onClick={() => onNavigate('statistics')} style={{ background: 'var(--accent)' }}>STATYSTYKI</button>
+        <button onClick={() => onNavigate('kalkulator')} style={{ background: 'var(--accent)' }}>KALKULATOR</button>
       </div>
     </div>
   )
