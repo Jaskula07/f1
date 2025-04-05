@@ -88,14 +88,20 @@ function Dashboard({ onNavigate }) {
       <hr />
       {/* Dodatkowe statystyki */}
       <div className="additional-stats">
-        <p><strong>Jeśli daalej będziesz wpłacał:</strong></p>
+        <p><strong>Jeśli dalej będziesz wpłacał:</strong></p>
         <p>dziennie średnio: {avgDaily.toFixed(2)}€</p>
         <p>tygodniowo średnio: {avgWeekly.toFixed(2)}€</p>
         <p>miesięcznie średnio: {avgMonthly.toFixed(2)}€</p>
-        {predictedDate && (
+        {predictedDate ? (
           <p>
             <strong>
               to osiągniesz cel dnia: <span style={{ color: 'var(--highlight)', fontWeight: 'bold' }}>{predictedDate}</span>
+            </strong>
+          </p>
+        ) : (
+          <p>
+            <strong>
+              to osiągniesz cel dnia: <span style={{ color: 'var(--highlight)', fontWeight: 'bold' }}>Brak danych</span>
             </strong>
           </p>
         )}
