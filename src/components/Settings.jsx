@@ -24,7 +24,7 @@ function Settings({ onBack }) {
     <div className="settings-view">
       <h2>Ustawienia</h2>
       <div className="field">
-        <label>Zmieñ nazwê celu:</label>
+        <label>ZmieÅ„ nazwÄ™ celu:</label>
         <input 
           type="text"
           value={newName}
@@ -32,10 +32,10 @@ function Settings({ onBack }) {
           placeholder="Nowa nazwa celu"
           style={{ borderColor: 'var(--info)' }}
         />
-        <button onClick={handleNameChange} style={{ background: 'var(--accent)' }}>ZatwierdŸ</button>
+        <button onClick={handleNameChange} style={{ background: 'var(--accent)' }}>ZatwierdÅº</button>
       </div>
       <div className="field">
-        <label>Zmieñ kwotê celu:</label>
+        <label>ZmieÅ„ kwotÄ™ celu:</label>
         <input 
           type="number"
           value={newAmount}
@@ -43,14 +43,14 @@ function Settings({ onBack }) {
           placeholder="Nowa kwota celu"
           style={{ borderColor: 'var(--info)' }}
         />
-        <button onClick={handleAmountChange} style={{ background: 'var(--accent)' }}>ZatwierdŸ</button>
+        <button onClick={handleAmountChange} style={{ background: 'var(--accent)' }}>ZatwierdÅº</button>
       </div>
       <div className="field">
         <button onClick={handleReset} style={{ background: 'var(--highlight)' }}>
-          Reset postêpów aplikacji
+          Reset postÄ™pÃ³w aplikacji
         </button>
       </div>
-      <button onClick={onBack} style={{ background: 'var(--accent)' }}>Powrót</button>
+      <button onClick={onBack} style={{ background: 'var(--accent)' }}>PowrÃ³t</button>
     </div>
   )
 }
