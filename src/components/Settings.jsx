@@ -17,7 +17,9 @@ function Settings({ onBack }) {
   }
 
   const handleReset = () => {
-    dispatch(reset())
+    if (window.confirm("Czy na pewno chcesz zresetować postępy aplikacji?")) {
+      dispatch(reset())
+    }
   }
 
   return (
@@ -45,12 +47,12 @@ function Settings({ onBack }) {
         />
         <button onClick={handleAmountChange} style={{ background: 'var(--accent)' }}>Zatwierdź</button>
       </div>
-      <div className="field">
+      <div className="field" style={{ marginTop: '20px' }}>
         <button onClick={handleReset} style={{ background: 'var(--highlight)' }}>
           Reset postępów aplikacji
         </button>
       </div>
-      <button onClick={onBack} style={{ background: 'var(--accent)' }}>Powrót</button>
+      <button onClick={onBack} style={{ background: 'var(--accent)', marginTop: '20px' }}>Powrót</button>
     </div>
   )
 }
