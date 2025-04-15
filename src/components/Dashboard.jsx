@@ -8,13 +8,20 @@ function Dashboard({ onNavigate }) {
   const goal = useSelector((state) => state.savings.goal)
   const total = useSelector((state) => state.savings.total)
   const entries = useSelector((state) => state.savings.entries)
+  const kupki = useSelector(state => state.kupki.kupki)
+  
+  // Obliczamy sumę środków przypisanych do kupki
+  const allocated = kupki.reduce((sum, k) => sum + k.allocated, 0)
+  // Dostępny saldo w głównej skarbonce to total minus funds przypisane do kupki
+  const available = total - allocated
+  
   const progress = goal.amount > 0 ? Math.min((total / goal.amount) * 100, 100) : 0
 
   // Pola do wprowadzania kwot
   const [addAmount, setAddAmount] = useState('')
   const [subtractAmount, setSubtractAmount] = useState('')
 
-  // Obliczenia statystyk na podstawie historii
+  // Obliczenia statystyk na podstawie historii wpłat
   const totalSaved = entries.reduce((sum, entry) => sum + entry.amount, 0)
   let firstDate = null
   if (entries.length > 0) {
@@ -59,7 +66,7 @@ function Dashboard({ onNavigate }) {
       <div className="goal-info">
         <p><strong>Cel:</strong> {goal.name}</p>
         <p><strong>Kwota celu:</strong> {goal.amount}€</p>
-        <p><strong>Zaoszczędzono:</strong> {total}€</p>
+        <p><strong>Zaoszczędzono:</strong> {available}€</p>
         <p><strong>Postęp:</strong> {progress.toFixed(0)}%</p>
       </div>
       <hr />
@@ -110,6 +117,10 @@ function Dashboard({ onNavigate }) {
         <button onClick={() => onNavigate('settings')} style={{ background: 'var(--accent)' }}>USTAWIENIA</button>
         <button onClick={() => onNavigate('history')} style={{ background: 'var(--accent)' }}>HISTORIA</button>
         <button onClick={() => onNavigate('kalkulator')} style={{ background: 'var(--accent)' }}>KALKULATOR</button>
+        {/* Zmiana przycisku "KUPKI" na ikonę, np. używając emoji 💩 */}
+        <button onClick={() => onNavigate('kupki')} style={{ background: 'var(--accent)', fontSize: '1.5rem' }}>
+          💩
+        </button>
       </div>
     </div>
   )
