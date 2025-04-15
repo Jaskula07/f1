@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { addEntry } from '../state/savingsSlice'
 import { addXP } from '../state/gameSlice'
-import DashboardKupki from './Kupki' // Import widoku "Kupki" jako komponentu, który będziemy renderować w modalu
 
 function Dashboard({ onNavigate }) {
   const dispatch = useDispatch()
@@ -50,9 +49,6 @@ function Dashboard({ onNavigate }) {
       setSubtractAmount('')
     }
   }
-
-  // Nowy stan dla modalu "Kupki"
-  const [showKupkiModal, setShowKupkiModal] = useState(false)
 
   return (
     <div className="dashboard-view">
@@ -114,20 +110,10 @@ function Dashboard({ onNavigate }) {
         <button onClick={() => onNavigate('settings')} style={{ background: 'var(--accent)' }}>USTAWIENIA</button>
         <button onClick={() => onNavigate('history')} style={{ background: 'var(--accent)' }}>HISTORIA</button>
         <button onClick={() => onNavigate('kalkulator')} style={{ background: 'var(--accent)' }}>KALKULATOR</button>
-        {/* Przyciski nawigacyjne – zamiast zmieniać widok, przycisk Kupki otwiera modal */}
-        <button onClick={() => setShowKupkiModal(true)} style={{ background: 'var(--accent)', fontSize: '1.5rem' }}>
+        <button onClick={() => onNavigate('kupki')} style={{ background: 'var(--accent)', fontSize: '1.5rem' }}>
           💩
         </button>
       </div>
-
-      {/* Modal wyświetlający widok Kupki */}
-      {showKupkiModal && (
-        <div className="modal">
-          <button className="close" onClick={() => setShowKupkiModal(false)}>❌</button>
-          {/* Renderujemy widok kupki wewnątrz modalu */}
-          <DashboardKupki onBack={() => setShowKupkiModal(false)} />
-        </div>
-      )}
     </div>
   )
 }
