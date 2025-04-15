@@ -53,7 +53,7 @@ function Dashboard({ onNavigate }) {
   return (
     <div className="dashboard-view">
       <div className="logo">
-        <h1>FinansowyQuest</h1>
+        <h1>FinansowyQuest</h1><h3>by Jaskulski Łukasz</h3>
       </div>
       <hr />
       <div className="goal-info">
