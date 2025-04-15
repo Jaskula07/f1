@@ -57,8 +57,8 @@ function Dashboard({ onNavigate }) {
       </div>
       <hr />
       <div className="goal-info">
-        <p><strong>Cel:</strong> {goal.name}</p>
-        <p><strong>Kwota celu:</strong> {goal.amount}€</p>
+        <p><strong>Skarbonka - :</strong> {goal.name}</p>
+        <p><strong>Kwota wszystkich celów:</strong> {goal.amount}€</p>
         <p><strong>Zaoszczędzono:</strong> {total}€</p>
         <p><strong>Postęp:</strong> {progress.toFixed(0)}%</p>
       </div>
