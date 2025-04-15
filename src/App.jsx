@@ -3,6 +3,7 @@ import Dashboard from './components/Dashboard'
 import Settings from './components/Settings'
 import History from './components/History'
 import Kalkulator from './components/Kalkulator'
+import Kupki from './components/Kupki' // nowy widok
 
 function App() {
   const [view, setView] = useState('dashboard')
@@ -17,6 +18,8 @@ function App() {
         return <History onBack={() => setView('dashboard')} />
       case 'kalkulator':
         return <Kalkulator onBack={() => setView('dashboard')} />
+      case 'kupki':
+        return <Kupki onBack={() => setView('dashboard')} />
       default:
         return <Dashboard onNavigate={setView} />
     }
