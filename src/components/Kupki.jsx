@@ -1,123 +1,206 @@
 import React, { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { addKupka, addFunds, removeKupka, spendFunds, transferFunds } from '../state/kupkiSlice'
 import { addEntry } from '../state/savingsSlice'
-import { addXP } from '../state/gameSlice'
 
-function Dashboard({ onNavigate }) {
+const availableIcons = ["💰", "📚", "🏦", "🎁", "🚀", "💎", "🔥", "🌟", "⚡", "🥇"]
+
+function Kupki({ onBack }) {
   const dispatch = useDispatch()
-  const goal = useSelector((state) => state.savings.goal)
-  // Globalna kwota oszczędności – nie modyfikujemy jej przy wydawaniu środków z kupek
-  const total = useSelector((state) => state.savings.total)
-  const entries = useSelector((state) => state.savings.entries)
-  
-  // W dashboardzie wyświetlamy globalną wartość, bez odejmowania środków przydzielonych do kupki
-  const progress = goal.amount > 0 ? Math.min((total / goal.amount) * 100, 100) : 0
+  const kupki = useSelector(state => state.kupki.kupki)
+  const [newName, setNewName] = useState('')
+  const [newIcon, setNewIcon] = useState(availableIcons[0])
+  const [newColor, setNewColor] = useState('#EA00D9') // domyślny kolor Neon Magenta
 
-  // Pola do wprowadzania kwot
-  const [addAmount, setAddAmount] = useState('')
-  const [subtractAmount, setSubtractAmount] = useState('')
-
-  // Obliczenia statystyk na podstawie historii wpłat
-  const totalSaved = entries.reduce((sum, entry) => sum + entry.amount, 0)
-  let firstDate = null
-  if (entries.length > 0) {
-    firstDate = new Date(Math.min(...entries.map(entry => new Date(entry.date).getTime())))
-  }
-  const today = new Date()
-  const diffDays = firstDate ? Math.max((today - firstDate) / (1000 * 3600 * 24), 1) : 1
-  const avgDaily = totalSaved / diffDays
-  const avgWeekly = avgDaily * 7
-  const avgMonthly = avgDaily * 30
-
-  // Predykcja daty osiągnięcia celu na podstawie wyliczonej średniej dziennej
-  let predictedDate = ""
-  if (avgDaily > 0 && goal.amount > total) {
-    const remaining = goal.amount - total
-    const daysNeeded = remaining / avgDaily
-    const predicted = new Date(today.getTime() + daysNeeded * 24 * 3600 * 1000)
-    predictedDate = predicted.toLocaleDateString()
-  }
-
-  const handleAdd = () => {
-    if (addAmount) {
-      dispatch(addEntry(Number(addAmount)))
-      dispatch(addXP(Number(addAmount)))
-      setAddAmount('')
+  // Formularz tworzenia nowej kupki
+  const handleAddKupka = () => {
+    if (newName.trim() !== '') {
+      dispatch(addKupka({ id: Date.now().toString(), name: newName, icon: newIcon, color: newColor }))
+      setNewName('')
+      setNewIcon(availableIcons[0])
     }
   }
 
-  const handleSubtract = () => {
-    if (subtractAmount) {
-      dispatch(addEntry(-Number(subtractAmount)))
-      setSubtractAmount('')
+  // Dodawanie środków do kupki – środki są dodawane tylko do kupki, globalna skarbonka nie jest modyfikowana
+  const [amountToAdd, setAmountToAdd] = useState('')
+  const handleAddFunds = (kupkaId) => {
+    if (amountToAdd) {
+      dispatch(addFunds({ kupkaId, amount: Number(amountToAdd) }))
+      setAmountToAdd('')
+    }
+  }
+
+  // Wydawanie środków – środki są usuwane tylko z kupki;
+  // globalne statystyki pozostają bez zmian
+  const [amountToSpend, setAmountToSpend] = useState('')
+  const handleSpendFunds = (kupkaId) => {
+    if (amountToSpend) {
+      dispatch(spendFunds({ kupkaId, amount: Number(amountToSpend) }))
+      setAmountToSpend('')
+    }
+  }
+
+  // Zmienne dla transferu środków
+  const [sourceKupkaId, setSourceKupkaId] = useState('')
+  const [transferAmount, setTransferAmount] = useState('')
+  const [target, setTarget] = useState('')
+  const handleTransferFunds = () => {
+    if (sourceKupkaId && transferAmount && target) {
+      dispatch(transferFunds({ sourceKupkaId, amount: Number(transferAmount), target, targetKupkaId: target !== 'main' ? target : undefined }))
+      // Jeśli target to 'main', globalne statystyki pozostają niezmienione (przyjmujemy, że transfer tylko przenosi środki)
+      setSourceKupkaId('')
+      setTransferAmount('')
+      setTarget('')
+    }
+  }
+
+  // Usuwanie kupki – środki z kupki są przywracane do głównej skarbonki (dodajemy akcję addEntry, aby przywrócić środki globalnie)
+  const handleRemoveKupka = (kupkaId, allocated) => {
+    if (window.confirm("Czy na pewno chcesz usunąć kupkę? Środki zostaną przywrócone do głównej skarbonki.")) {
+      dispatch(removeKupka(kupkaId))
+      if (allocated > 0) {
+        dispatch(addEntry(Number(allocated)))
+      }
     }
   }
 
   return (
-    <div className="dashboard-view">
-      <div className="logo">
-        <h1>FinansowyQuest</h1>
-      </div>
-      <hr />
-      <div className="goal-info">
-        <p><strong>Cel:</strong> {goal.name}</p>
-        <p><strong>Kwota celu:</strong> {goal.amount}€</p>
-        {/* Wyświetlamy globalną kwotę oszczędności, bez odejmowania środków przypisanych do kupki */}
-        <p><strong>Zaoszczędzono:</strong> {total}€</p>
-        <p><strong>Postęp:</strong> {progress.toFixed(0)}%</p>
-      </div>
-      <hr />
-      <div className="transaction-inputs">
-        <div className="transaction">
-          <input 
-            type="number" 
-            value={addAmount} 
-            onChange={(e) => setAddAmount(e.target.value)}
-            placeholder="Kwota do dodania"
-            style={{ borderColor: 'var(--info)' }}
-          />
-          <button onClick={handleAdd} style={{ background: 'var(--accent)' }}>Dodaj</button>
+    <div className="kupki-view">
+      <h2>Kupki pieniędzy</h2>
+      
+      {/* Formularz tworzenia nowej kupki */}
+      <div className="create-kupka">
+        <h3>Utwórz nową kupkę</h3>
+        <input 
+          type="text" 
+          value={newName} 
+          onChange={(e) => setNewName(e.target.value)} 
+          placeholder="Nazwa kupki (np. na rachunki)" 
+        />
+        <div className="icon-selector">
+          <p>Wybierz ikonę:</p>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {availableIcons.map((icon, index) => (
+              <button 
+                key={index}
+                onClick={() => setNewIcon(icon)}
+                style={{ 
+                  padding: '4px', 
+                  fontSize: '1.5rem',
+                  background: newIcon === icon ? 'var(--accent)' : 'transparent',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="transaction">
+        <div className="color-picker">
+          <p>Wybierz kolor:</p>
           <input 
-            type="number" 
-            value={subtractAmount} 
-            onChange={(e) => setSubtractAmount(e.target.value)}
-            placeholder="Kwota do odjęcia"
-            style={{ borderColor: 'var(--info)' }}
+            type="color" 
+            value={newColor} 
+            onChange={(e) => setNewColor(e.target.value)} 
+            title="Wybierz kolor" 
           />
-          <button onClick={handleSubtract} style={{ background: 'var(--accent)' }}>Odejmij</button>
         </div>
+        <button onClick={handleAddKupka}>Dodaj kupkę</button>
       </div>
+      
       <hr />
-      <div className="additional-stats">
-        <p><strong>Jeśli dalej będziesz wpłacał:</strong></p>
-        <p>dziennie średnio: {avgDaily.toFixed(2)}€</p>
-        <p>tygodniowo średnio: {avgWeekly.toFixed(2)}€</p>
-        <p>miesięcznie średnio: {avgMonthly.toFixed(2)}€</p>
-        {predictedDate ? (
-          <p>
-            <strong>
-              to osiągniesz cel dnia: <span style={{ color: 'var(--highlight)', fontWeight: 'bold' }}>{predictedDate}</span>
-            </strong>
-          </p>
+      
+      {/* Lista utworzonych kupek */}
+      <div className="list-kupki">
+        <h3>Twoje kupki</h3>
+        {kupki.length === 0 ? (
+          <p>Nie utworzono jeszcze żadnej kupki.</p>
         ) : (
-          <p>
-            <strong>
-              to osiągniesz cel dnia: <span style={{ color: 'var(--highlight)', fontWeight: 'bold' }}>Brak danych</span>
-            </strong>
-          </p>
+          <ul>
+            {kupki.map(kupka => (
+              <li key={kupka.id} style={{ marginBottom: '8px', border: `1px solid ${kupka.color}`, padding: '4px' }}>
+                <span style={{ marginRight: '8px', fontSize: '1.5rem' }}>{kupka.icon}</span>
+                <strong>{kupka.name}</strong> – Kwota: {kupka.allocated}€
+                <button onClick={() => handleRemoveKupka(kupka.id, kupka.allocated)} style={{ marginLeft: '10px', background: 'red', color: '#fff' }}>
+                  Usuń
+                </button>
+                <div style={{ marginTop: '4px' }}>
+                  <input 
+                    type="number" 
+                    placeholder="Kwota do wydania" 
+                    value={amountToSpend} 
+                    onChange={(e) => setAmountToSpend(e.target.value)}
+                    style={{ borderColor: 'var(--info)' }}
+                  />
+                  <button onClick={() => handleSpendFunds(kupka.id)} style={{ background: 'var(--accent)', marginLeft: '4px' }}>
+                    Wydaj
+                  </button>
+                </div>
+                <div style={{ marginTop: '4px' }}>
+                  <input 
+                    type="number" 
+                    placeholder="Kwota do dodania" 
+                    value={amountToAdd} 
+                    onChange={(e) => setAmountToAdd(e.target.value)}
+                    style={{ borderColor: 'var(--info)' }}
+                  />
+                  <button onClick={() => handleAddFunds(kupka.id)} style={{ background: 'var(--accent)', marginLeft: '4px' }}>
+                    Dodaj środki
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
+      
       <hr />
-      <div className="navigation-buttons">
-        <button onClick={() => onNavigate('settings')} style={{ background: 'var(--accent)' }}>USTAWIENIA</button>
-        <button onClick={() => onNavigate('history')} style={{ background: 'var(--accent)' }}>HISTORIA</button>
-        <button onClick={() => onNavigate('kalkulator')} style={{ background: 'var(--accent)' }}>KALKULATOR</button>
-        <button onClick={() => onNavigate('kupki')} style={{ background: 'var(--accent)' }}>KUPKI</button>
+      
+      {/* Sekcja transferu środków */}
+      <div className="transfer-funds">
+        <h3>Przenieś środki</h3>
+        <div>
+          <label>Źródło: </label>
+          <select value={sourceKupkaId} onChange={(e) => setSourceKupkaId(e.target.value)}>
+            <option value="">Wybierz kupkę</option>
+            {kupki.map(kupka => (
+              <option key={kupka.id} value={kupka.id}>{kupka.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label>Cel: </label>
+          <select value={target} onChange={(e) => setTarget(e.target.value)}>
+            <option value="">Wybierz cel</option>
+            <option value="main">Główna skarbonka</option>
+            {kupki.filter(k => k.id !== sourceKupkaId).map(kupka => (
+              <option key={kupka.id} value={kupka.id}>{kupka.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label>Kwota: </label>
+          <input 
+            type="number" 
+            value={transferAmount} 
+            onChange={(e) => setTransferAmount(e.target.value)}
+            placeholder="Kwota do przeniesienia"
+            style={{ borderColor: 'var(--info)' }}
+          />
+        </div>
+        <button onClick={handleTransferFunds} style={{ background: 'var(--accent)', marginTop: '10px' }}>
+          Transferuj
+        </button>
       </div>
+      
+      <hr />
+      <div>
+        <p><em>Łącznie przydzielono do kup: {kupki.reduce((sum, k) => sum + k.allocated, 0)}€</em></p>
+      </div>
+      <button onClick={onBack} style={{ background: 'var(--accent)', marginTop: '20px' }}>Powrót</button>
     </div>
   )
 }
 
-export default Dashboard
+export default Kupki
