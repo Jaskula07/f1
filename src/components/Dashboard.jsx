@@ -2,19 +2,13 @@ import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { addEntry } from '../state/savingsSlice'
 import { addXP } from '../state/gameSlice'
+import DashboardKupki from './Kupki' // Import widoku "Kupki" jako komponentu, który będziemy renderować w modalu
 
 function Dashboard({ onNavigate }) {
   const dispatch = useDispatch()
   const goal = useSelector((state) => state.savings.goal)
   const total = useSelector((state) => state.savings.total)
   const entries = useSelector((state) => state.savings.entries)
-  const kupki = useSelector(state => state.kupki.kupki)
-  
-  // Obliczamy sumę środków przypisanych do kupki
-  const allocated = kupki.reduce((sum, k) => sum + k.allocated, 0)
-  // Dostępny saldo w głównej skarbonce to total minus funds przypisane do kupki
-  const available = total - allocated
-  
   const progress = goal.amount > 0 ? Math.min((total / goal.amount) * 100, 100) : 0
 
   // Pola do wprowadzania kwot
@@ -57,6 +51,9 @@ function Dashboard({ onNavigate }) {
     }
   }
 
+  // Nowy stan dla modalu "Kupki"
+  const [showKupkiModal, setShowKupkiModal] = useState(false)
+
   return (
     <div className="dashboard-view">
       <div className="logo">
@@ -66,7 +63,7 @@ function Dashboard({ onNavigate }) {
       <div className="goal-info">
         <p><strong>Cel:</strong> {goal.name}</p>
         <p><strong>Kwota celu:</strong> {goal.amount}€</p>
-        <p><strong>Zaoszczędzono:</strong> {available}€</p>
+        <p><strong>Zaoszczędzono:</strong> {total}€</p>
         <p><strong>Postęp:</strong> {progress.toFixed(0)}%</p>
       </div>
       <hr />
@@ -117,11 +114,20 @@ function Dashboard({ onNavigate }) {
         <button onClick={() => onNavigate('settings')} style={{ background: 'var(--accent)' }}>USTAWIENIA</button>
         <button onClick={() => onNavigate('history')} style={{ background: 'var(--accent)' }}>HISTORIA</button>
         <button onClick={() => onNavigate('kalkulator')} style={{ background: 'var(--accent)' }}>KALKULATOR</button>
-        {/* Zmiana przycisku "KUPKI" na ikonę, np. używając emoji 💩 */}
-        <button onClick={() => onNavigate('kupki')} style={{ background: 'var(--accent)', fontSize: '1.5rem' }}>
+        {/* Przyciski nawigacyjne – zamiast zmieniać widok, przycisk Kupki otwiera modal */}
+        <button onClick={() => setShowKupkiModal(true)} style={{ background: 'var(--accent)', fontSize: '1.5rem' }}>
           💩
         </button>
       </div>
+
+      {/* Modal wyświetlający widok Kupki */}
+      {showKupkiModal && (
+        <div className="modal">
+          <button className="close" onClick={() => setShowKupkiModal(false)}>❌</button>
+          {/* Renderujemy widok kupki wewnątrz modalu */}
+          <DashboardKupki onBack={() => setShowKupkiModal(false)} />
+        </div>
+      )}
     </div>
   )
 }
