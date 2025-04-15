@@ -12,7 +12,7 @@ function Kupki({ onBack }) {
   const [newIcon, setNewIcon] = useState(availableIcons[0])
   const [newColor, setNewColor] = useState('#EA00D9') // domyślny kolor Neon Magenta
 
-  // Formularz tworzenia kupki
+  // Formularz tworzenia nowej kupki
   const handleAddKupka = () => {
     if (newName.trim() !== '') {
       dispatch(addKupka({ id: Date.now().toString(), name: newName, icon: newIcon, color: newColor }))
@@ -21,24 +21,21 @@ function Kupki({ onBack }) {
     }
   }
 
-  // Dodawanie środków do kupki – środki dodane poprzez tę operację zostają odebrane z głównej skarbonki
-  // (akcja addEntry wywoływana jest tutaj, aby zmniejszyć globalną kwotę, ale wydawanie środków nie ma wpływu na globalne statystyki)
+  // Dodawanie środków do kupki - teraz globalne statystyki nie są modyfikowane!
   const [amountToAdd, setAmountToAdd] = useState('')
   const handleAddFunds = (kupkaId) => {
     if (amountToAdd) {
       dispatch(addFunds({ kupkaId, amount: Number(amountToAdd) }))
-      // Dla dodawania środków do kupki chcemy, aby globalne statystyki z głównej skarbonki zostały zaktualizowane (środki są przenoszone)
-      dispatch(addEntry(-Number(amountToAdd)))
+      // Usunięto wywołanie addEntry, globalny stan pozostaje bez zmian.
       setAmountToAdd('')
     }
   }
 
-  // Wydawanie środków – środki są usuwane tylko z kupki (akcja spendFunds)
+  // Wydawanie środków - tylko operacja na kupce
   const [amountToSpend, setAmountToSpend] = useState('')
   const handleSpendFunds = (kupkaId) => {
     if (amountToSpend) {
       dispatch(spendFunds({ kupkaId, amount: Number(amountToSpend) }))
-      // Przy wydawaniu środków nie wykonujemy akcji, która modyfikuje globalne statystyki – środki są tylko usuwane z danej kupki.
       setAmountToSpend('')
     }
   }
@@ -46,17 +43,24 @@ function Kupki({ onBack }) {
   // Transfer środków między kupkami lub do głównej skarbonki
   const [sourceKupkaId, setSourceKupkaId] = useState('')
   const [transferAmount, setTransferAmount] = useState('')
-  const [target, setTarget] = useState('') // target: albo kupka id albo 'main'
+  const [target, setTarget] = useState('') // target: albo kupkaId albo 'main'
   const handleTransferFunds = () => {
     if (sourceKupkaId && transferAmount && target) {
       dispatch(transferFunds({ sourceKupkaId, amount: Number(transferAmount), target, targetKupkaId: target !== 'main' ? target : undefined }))
-      // Jeśli target to 'main', należałoby dodać środki z powrotem do głównej skarbonki – ta operacja nie wpływa na globalne statystyki widoczne w dashboardzie.
-      if (target === 'main') {
-        dispatch(addEntry(Number(transferAmount)))
-      }
+      // Jeśli target to 'main', dodatkowe operacje nie są wykonywane – globalne statystyki pozostają niezmienione.
       setSourceKupkaId('')
       setTransferAmount('')
       setTarget('')
+    }
+  }
+
+  // Usuwanie kupki – środki są przywracane do głównej skarbonki za pomocą akcji addEntry
+  const handleRemoveKupka = (kupkaId, allocated) => {
+    if (window.confirm("Czy na pewno chcesz usunąć kupkę? Środki zostaną przywrócone do głównej skarbonki.")) {
+      dispatch(removeKupka(kupkaId))
+      if (allocated > 0) {
+        dispatch(addEntry(Number(allocated)))
+      }
     }
   }
 
@@ -118,8 +122,7 @@ function Kupki({ onBack }) {
               <li key={kupka.id} style={{ marginBottom: '8px', border: `1px solid ${kupka.color}`, padding: '4px' }}>
                 <span style={{ marginRight: '8px', fontSize: '1.5rem' }}>{kupka.icon}</span>
                 <strong>{kupka.name}</strong> – Kwota: {kupka.allocated}€
-                <button onClick={() => console.log('Wywołaj usunięcie kupki') /* obsługa usunięcia */} 
-                  style={{ marginLeft: '10px', background: 'red', color: '#fff' }}>
+                <button onClick={() => handleRemoveKupka(kupka.id, kupka.allocated)} style={{ marginLeft: '10px', background: 'red', color: '#fff' }}>
                   Usuń
                 </button>
                 <div style={{ marginTop: '4px' }}>
@@ -132,6 +135,18 @@ function Kupki({ onBack }) {
                   />
                   <button onClick={() => handleSpendFunds(kupka.id)} style={{ background: 'var(--accent)', marginLeft: '4px' }}>
                     Wydaj
+                  </button>
+                </div>
+                <div style={{ marginTop: '4px' }}>
+                  <input 
+                    type="number" 
+                    placeholder="Kwota do dodania" 
+                    value={amountToAdd} 
+                    onChange={(e) => setAmountToAdd(e.target.value)}
+                    style={{ borderColor: 'var(--info)' }}
+                  />
+                  <button onClick={() => handleAddFunds(kupka.id)} style={{ background: 'var(--accent)', marginLeft: '4px' }}>
+                    Dodaj środki
                   </button>
                 </div>
               </li>
