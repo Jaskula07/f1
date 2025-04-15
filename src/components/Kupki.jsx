@@ -12,61 +12,51 @@ function Kupki({ onBack }) {
   const [newIcon, setNewIcon] = useState(availableIcons[0])
   const [newColor, setNewColor] = useState('#EA00D9') // domyślny kolor Neon Magenta
 
-  // Nowa kupka – formularz
+  // Formularz tworzenia kupki
   const handleAddKupka = () => {
     if (newName.trim() !== '') {
       dispatch(addKupka({ id: Date.now().toString(), name: newName, icon: newIcon, color: newColor }))
       setNewName('')
       setNewIcon(availableIcons[0])
-      // Możesz zresetować kolor lub pozostawić aktualny
     }
   }
 
-  // Dodawanie środków do kupki
+  // Dodawanie środków do kupki – środki dodane poprzez tę operację zostają odebrane z głównej skarbonki
+  // (akcja addEntry wywoływana jest tutaj, aby zmniejszyć globalną kwotę, ale wydawanie środków nie ma wpływu na globalne statystyki)
   const [amountToAdd, setAmountToAdd] = useState('')
   const handleAddFunds = (kupkaId) => {
     if (amountToAdd) {
       dispatch(addFunds({ kupkaId, amount: Number(amountToAdd) }))
-      // Dodajemy wpis o transferze - odjęcie środków z głównej skarbonki
+      // Dla dodawania środków do kupki chcemy, aby globalne statystyki z głównej skarbonki zostały zaktualizowane (środki są przenoszone)
       dispatch(addEntry(-Number(amountToAdd)))
       setAmountToAdd('')
     }
   }
 
-  // Wydawanie środków z kupki (środki zostają usunięte tylko z kupki)
+  // Wydawanie środków – środki są usuwane tylko z kupki (akcja spendFunds)
   const [amountToSpend, setAmountToSpend] = useState('')
   const handleSpendFunds = (kupkaId) => {
     if (amountToSpend) {
       dispatch(spendFunds({ kupkaId, amount: Number(amountToSpend) }))
+      // Przy wydawaniu środków nie wykonujemy akcji, która modyfikuje globalne statystyki – środki są tylko usuwane z danej kupki.
       setAmountToSpend('')
     }
   }
 
-  // Transfer środków z jednej kupki do innej lub do głównej skarbonki
+  // Transfer środków między kupkami lub do głównej skarbonki
   const [sourceKupkaId, setSourceKupkaId] = useState('')
   const [transferAmount, setTransferAmount] = useState('')
   const [target, setTarget] = useState('') // target: albo kupka id albo 'main'
   const handleTransferFunds = () => {
     if (sourceKupkaId && transferAmount && target) {
       dispatch(transferFunds({ sourceKupkaId, amount: Number(transferAmount), target, targetKupkaId: target !== 'main' ? target : undefined }))
-      // Jeśli target to 'main', dodaj środki z powrotem do głównej skarbonki
+      // Jeśli target to 'main', należałoby dodać środki z powrotem do głównej skarbonki – ta operacja nie wpływa na globalne statystyki widoczne w dashboardzie.
       if (target === 'main') {
         dispatch(addEntry(Number(transferAmount)))
       }
       setSourceKupkaId('')
       setTransferAmount('')
       setTarget('')
-    }
-  }
-
-  // Usuwanie kupki – środki z kupki są przywracane do głównej skarbonki
-  const handleRemoveKupka = (kupkaId, allocated) => {
-    if (window.confirm("Czy na pewno chcesz usunąć kupkę? Środki zostaną przywrócone do głównej skarbonki.")) {
-      dispatch(removeKupka(kupkaId))
-      // Przywróć środki do głównej skarbonki
-      if (allocated > 0) {
-        dispatch(addEntry(Number(allocated)))
-      }
     }
   }
 
@@ -128,8 +118,8 @@ function Kupki({ onBack }) {
               <li key={kupka.id} style={{ marginBottom: '8px', border: `1px solid ${kupka.color}`, padding: '4px' }}>
                 <span style={{ marginRight: '8px', fontSize: '1.5rem' }}>{kupka.icon}</span>
                 <strong>{kupka.name}</strong> – Kwota: {kupka.allocated}€
-                {/* Przyciski do usuwania i wydawania */}
-                <button onClick={() => handleRemoveKupka(kupka.id, kupka.allocated)} style={{ marginLeft: '10px', background: 'red', color: '#fff' }}>
+                <button onClick={() => console.log('Wywołaj usunięcie kupki') /* obsługa usunięcia */} 
+                  style={{ marginLeft: '10px', background: 'red', color: '#fff' }}>
                   Usuń
                 </button>
                 <div style={{ marginTop: '4px' }}>
