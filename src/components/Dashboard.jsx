@@ -58,8 +58,8 @@ function Dashboard({ onNavigate }) {
       <hr />
       <div className="goal-info">
         <p><strong>Skarbonka - </strong> {goal.name}</p>
-        <p><strong>Kwota wszystkich celów:</strong> {goal.amount}€</p>
-        <p><strong>Zaoszczędzono:</strong> {total}€</p>
+        <p><strong>Cel nadrzędny: </strong> {goal.amount}€</p>
+        <p><strong>W sumie uzbierano: </strong> {total}€</p>
         <p><strong>Postęp:</strong> {progress.toFixed(0)}%</p>
       </div>
       <hr />
