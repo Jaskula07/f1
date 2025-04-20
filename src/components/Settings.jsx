@@ -26,7 +26,7 @@ function Settings({ onBack }) {
     <div className="settings-view">
       <h2>Ustawienia</h2>
       <div className="field">
-        <label>Zmień nazwę celu:</label>
+        <label>Zmień nazwę Skarbonki:</label>
         <input 
           type="text"
           value={newName}
@@ -37,7 +37,7 @@ function Settings({ onBack }) {
         <button onClick={handleNameChange} style={{ background: 'var(--accent)' }}>Zatwierdź</button>
       </div>
       <div className="field">
-        <label>Zmień kwotę celu:</label>
+        <label>Zmień kwotę celu nadrzędnego:</label>
         <input 
           type="number"
           value={newAmount}
