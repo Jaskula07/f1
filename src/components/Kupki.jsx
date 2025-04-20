@@ -113,8 +113,8 @@ function Kupki({ onBack }) {
       
       {/* Lista utworzonych kupek */}
       <div className="list-kupki">
-        <h3>Twoje kupki</h3>
-<h1>Odwzoruj te kupki w Realu!</h1>
+        <h2>Twoje kupki</h2>
+<h5>Odwzoruj te kupki w Realu!</h5>
         {kupki.length === 0 ? (
           <p>Nie utworzono jeszcze żadnej kupki.</p>
         ) : (
